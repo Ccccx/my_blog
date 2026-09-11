@@ -483,6 +483,16 @@ pre code {
   word-break: break-all;
 }
 
+.markdown-body img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 1.25rem 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
 .waifu-dock,
 .waifu-mini,
 .waifu-restore {

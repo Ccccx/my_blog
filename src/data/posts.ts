@@ -1,7 +1,17 @@
 import type { Post } from '../types'
 import featuredBody from '../content/20260911GitHub日榜分析.md?raw'
+import grokBotBody from '../content/认识Grok-Bot.md?raw'
 
 export const posts: Post[] = [
+  {
+    slug: '认识Grok-Bot',
+    title: '认识 Grok Bot：能真正干活的 AI 队友',
+    date: '2026-09-11',
+    tags: ['Grok Bot', 'AI Agent', 'Cursor', '上手指南'],
+    summary:
+      '面向新人的 Grok Bot 系统介绍：它是什么、核心能力、从安装到第一次交付，以及销售/工程/运营/文创等真实场景，附界面截图操作附录。',
+    body: grokBotBody,
+  },
   {
     slug: '20260911GitHub日榜分析',
     title: '20260911GitHub日榜分析',
