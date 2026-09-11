@@ -33,6 +33,9 @@ jobs:
       - name: Check markdown tables
         run: npm run check:markdown
 
+      - name: Check daily-brief parsing
+        run: npm run check:brief
+
       - name: Build
         run: npm run build
 

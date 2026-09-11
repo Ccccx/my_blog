@@ -8,8 +8,9 @@ export function About() {
         欢迎来到 <strong>{SITE_NAME}</strong>。{SITE_DESCRIPTION}。
       </p>
       <p>
-        本站使用 Vite、React、TypeScript 与 react-markdown 构建，部署于 GitHub
-        Pages。
+        本站使用 Vite、React、TypeScript 与 react-markdown 构建，以 Soft UI
+        Evolution 浅色主题部署于 GitHub Pages。右下角看板娘会轮播 AI News Radar
+        日更简报。
       </p>
       <p>
         仓库地址：{' '}

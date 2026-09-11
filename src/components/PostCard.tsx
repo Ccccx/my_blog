@@ -12,6 +12,7 @@ export function PostCard({ post }: PostCardProps) {
       <Link to={`/posts/${encodeURIComponent(post.slug)}`} className="post-card-link">
         <div className="post-card-meta">
           <time dateTime={post.date}>{post.date}</time>
+          <span className="post-card-read">阅读</span>
         </div>
         <h2 className="post-card-title">{post.title}</h2>
         <p className="post-card-summary">{post.summary}</p>
