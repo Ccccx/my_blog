@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check markdown tables
+        run: npm run check:markdown
+
       - name: Build
         run: npm run build
 
