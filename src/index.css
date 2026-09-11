@@ -490,15 +490,41 @@ pre code {
   right: max(12px, env(safe-area-inset-right));
   bottom: max(12px, env(safe-area-inset-bottom));
   z-index: 40;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.waifu-dock.is-placed,
+.waifu-mini.is-placed,
+.waifu-restore.is-placed {
+  right: auto;
+  bottom: auto;
+}
+
+.waifu-dock.is-dragging,
+.waifu-mini.is-dragging,
+.waifu-restore.is-dragging {
+  cursor: grabbing;
 }
 
 .waifu-dock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   width: min(360px, calc(100vw - 1.4rem));
+  pointer-events: auto;
+}
+
+.waifu-live2d-host {
+  width: 150px;
+  height: 220px;
+  position: relative;
   pointer-events: none;
 }
 
-.waifu-dock.has-live2d {
-  bottom: 210px;
+.waifu-dock:not(.has-live2d) .waifu-live2d-host {
+  display: none;
 }
 
 .waifu-panel,
@@ -632,21 +658,16 @@ pre code {
 
 .waifu-mini {
   width: 72px;
-  padding: 0;
-  border: 0;
   background: transparent;
-  cursor: pointer;
 }
 
 .waifu-restore {
-  border: 0;
   border-radius: 999px;
   padding: 0.45rem 0.8rem;
   background: #fff;
   color: var(--primary);
   font-weight: 700;
   box-shadow: var(--shadow);
-  cursor: pointer;
 }
 
 @keyframes waifu-bob {
@@ -693,10 +714,6 @@ pre code {
     width: min(300px, calc(100vw - 1rem));
   }
 
-  .waifu-dock.has-live2d {
-    bottom: 170px;
-  }
-
   .site-main {
     padding-bottom: 7.5rem;
   }
@@ -711,7 +728,13 @@ pre code {
   }
 }
 
+.waifu-live2d-host #live2d-widget,
 #live2d-widget {
-  z-index: 35 !important;
-  pointer-events: auto;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
 }

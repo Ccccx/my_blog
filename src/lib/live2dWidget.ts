@@ -57,3 +57,41 @@ export function setLive2dVisible(visible: boolean) {
   const node = document.getElementById(WIDGET_ID)
   if (node) node.style.display = visible ? 'block' : 'none'
 }
+
+export function waitForLive2dNode(timeoutMs = 8000): Promise<HTMLElement | null> {
+  const existing = document.getElementById(WIDGET_ID)
+  if (existing) return Promise.resolve(existing)
+  return new Promise((resolve) => {
+    const started = Date.now()
+    const timer = window.setInterval(() => {
+      const node = document.getElementById(WIDGET_ID)
+      if (node || Date.now() - started > timeoutMs) {
+        window.clearInterval(timer)
+        resolve(node)
+      }
+    }, 80)
+  })
+}
+
+export function adoptLive2d(host: HTMLElement): boolean {
+  const node = document.getElementById(WIDGET_ID)
+  if (!node) return false
+  if (node.parentElement !== host) host.appendChild(node)
+  node.style.position = 'relative'
+  node.style.left = 'auto'
+  node.style.right = 'auto'
+  node.style.top = 'auto'
+  node.style.bottom = 'auto'
+  node.style.margin = '0'
+  node.style.zIndex = '1'
+  node.style.pointerEvents = 'none'
+  node.style.display = 'block'
+  return true
+}
+
+export function stashLive2d() {
+  const node = document.getElementById(WIDGET_ID)
+  if (!node) return
+  node.style.display = 'none'
+  if (node.parentElement !== document.body) document.body.appendChild(node)
+}

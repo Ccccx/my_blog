@@ -1,11 +1,27 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   fetchDailyBrief,
   formatGeneratedAt,
   type BriefFeed,
   type BriefHeadline,
 } from '../lib/dailyBrief'
-import { loadLive2dWidget, setLive2dVisible } from '../lib/live2dWidget'
+import {
+  adoptLive2d,
+  loadLive2dWidget,
+  setLive2dVisible,
+  stashLive2d,
+  waitForLive2dNode,
+} from '../lib/live2dWidget'
+import {
+  clampPosition,
+  defaultBottomRight,
+  movementExceeded,
+  nextDragPosition,
+  readStoredPosition,
+  writeStoredPosition,
+  type Point,
+  type Size,
+} from '../lib/waifuPosition'
 import { WaifuAvatar } from './WaifuAvatar'
 
 const STORAGE_KEY = 'waifu-companion-state'
@@ -24,7 +40,22 @@ function readState(): CompanionState {
   return 'open'
 }
 
+function viewport(): Size {
+  return { width: window.innerWidth, height: window.innerHeight }
+}
+
 export function WaifuCompanion() {
+  const shellRef = useRef<HTMLDivElement>(null)
+  const live2dHostRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{
+    pointerId: number
+    start: Point
+    origin: Point
+    moved: boolean
+  } | null>(null)
+  const skipClickRef = useRef(false)
+  const posRef = useRef<Point | null>(null)
+
   const [state, setState] = useState<CompanionState>(() =>
     typeof window === 'undefined' ? 'open' : readState(),
   )
@@ -32,12 +63,22 @@ export function WaifuCompanion() {
   const [error, setError] = useState<string | null>(null)
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [dragging, setDragging] = useState(false)
+  const [pos, setPos] = useState<Point | null>(null)
   const [reducedMotion, setReducedMotion] = useState(
     () =>
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
   const [live2dReady, setLive2dReady] = useState(false)
+
+  const measure = useCallback((): Size => {
+    const rect = shellRef.current?.getBoundingClientRect()
+    if (!rect || rect.width === 0) {
+      return state === 'open' ? { width: 360, height: 320 } : { width: 88, height: 88 }
+    }
+    return { width: rect.width, height: rect.height }
+  }, [state])
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -65,23 +106,58 @@ export function WaifuCompanion() {
 
   useEffect(() => {
     setLive2dVisible(state === 'open' && live2dReady)
+    if (state !== 'open' || !live2dReady) return
+    let cancelled = false
+    waitForLive2dNode().then((node) => {
+      if (!cancelled && node && live2dHostRef.current) adoptLive2d(live2dHostRef.current)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [state, live2dReady])
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const stored = readStoredPosition()
+      const size = measure()
+      const next = stored
+        ? clampPosition(stored, size, viewport())
+        : defaultBottomRight(size, viewport())
+      posRef.current = next
+      setPos(next)
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [state, live2dReady, measure])
+
+  useEffect(() => {
+    const onResize = () => {
+      setPos((prev) => {
+        if (!prev) return prev
+        const next = clampPosition(prev, measure(), viewport())
+        posRef.current = next
+        return next
+      })
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [measure])
 
   const headlines = feed?.headlines ?? []
   const current: BriefHeadline | undefined = headlines[index]
 
   useEffect(() => {
-    if (state !== 'open' || paused || headlines.length < 2) return
+    if (state !== 'open' || paused || dragging || headlines.length < 2) return
     const delay = reducedMotion ? ROTATE_REDUCED_MS : ROTATE_MS
     const timer = window.setInterval(() => {
       setIndex((prev) => (prev + 1) % headlines.length)
     }, delay)
     return () => window.clearInterval(timer)
-  }, [state, paused, headlines.length, reducedMotion])
+  }, [state, paused, dragging, headlines.length, reducedMotion])
 
   const generatedLabel = useMemo(() => formatGeneratedAt(feed?.generatedAt), [feed])
 
   function persist(next: CompanionState) {
+    if (next !== 'open') stashLive2d()
     setState(next)
     try {
       localStorage.setItem(STORAGE_KEY, next)
@@ -90,38 +166,119 @@ export function WaifuCompanion() {
     }
   }
 
+  function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    if ((event.target as HTMLElement).closest('.waifu-actions')) return
+    if (!pos) return
+    const drag = {
+      pointerId: event.pointerId,
+      start: { x: event.clientX, y: event.clientY },
+      origin: pos,
+      moved: false,
+    }
+    dragRef.current = drag
+    skipClickRef.current = false
+
+    const onMove = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== drag.pointerId) return
+      const now = { x: moveEvent.clientX, y: moveEvent.clientY }
+      if (!drag.moved && !movementExceeded(drag.start, now)) return
+      if (!drag.moved) {
+        drag.moved = true
+        skipClickRef.current = true
+        setDragging(true)
+        shellRef.current?.setPointerCapture(moveEvent.pointerId)
+      }
+      const next = nextDragPosition(drag.origin, drag.start, now, measure(), viewport())
+      posRef.current = next
+      setPos(next)
+    }
+
+    const onUp = (upEvent: PointerEvent) => {
+      if (upEvent.pointerId !== drag.pointerId) return
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+      dragRef.current = null
+      setDragging(false)
+      if (drag.moved && posRef.current) writeStoredPosition(posRef.current)
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+  }
+
+  function onClickCapture(event: React.MouseEvent<HTMLDivElement>) {
+    if (!skipClickRef.current) return
+    event.preventDefault()
+    event.stopPropagation()
+    skipClickRef.current = false
+  }
+
+  const placed = Boolean(pos)
+  const shellClass = [
+    state === 'open' ? 'waifu-dock' : state === 'min' ? 'waifu-mini' : 'waifu-restore',
+    reducedMotion ? 'is-static' : '',
+    live2dReady && state === 'open' ? 'has-live2d' : '',
+    placed ? 'is-placed' : '',
+    dragging ? 'is-dragging' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const shellStyle = pos
+    ? { left: pos.x, top: pos.y, right: 'auto', bottom: 'auto' }
+    : undefined
+
+  const shellProps = {
+    ref: shellRef,
+    className: shellClass,
+    style: shellStyle,
+    onPointerDown,
+    onClickCapture,
+    onMouseEnter: () => setPaused(true),
+    onMouseLeave: () => {
+      if (!dragging) setPaused(false)
+    },
+  }
+
   if (state === 'hidden') {
     return (
-      <button
-        type="button"
-        className="waifu-restore"
-        onClick={() => persist('open')}
+      <div
+        {...shellProps}
+        role="button"
+        tabIndex={0}
         aria-label="显示看板娘"
+        onClick={() => persist('open')}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') persist('open')
+        }}
       >
         看板娘
-      </button>
+      </div>
     )
   }
 
   if (state === 'min') {
     return (
-      <button
-        type="button"
-        className="waifu-mini"
-        onClick={() => persist('open')}
+      <div
+        {...shellProps}
+        role="button"
+        tabIndex={0}
         aria-label="展开看板娘"
+        onClick={() => persist('open')}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') persist('open')
+        }}
       >
         <WaifuAvatar />
-      </button>
+      </div>
     )
   }
 
   return (
-    <aside
-      className={`waifu-dock${reducedMotion ? ' is-static' : ''}${live2dReady ? ' has-live2d' : ''}`}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
+    <div {...shellProps}>
       <div className="waifu-panel">
         <div className="waifu-toolbar">
           <span className="waifu-kicker">AI News Radar</span>
@@ -154,6 +311,7 @@ export function WaifuCompanion() {
           </div>
         </div>
       </div>
-    </aside>
+      <div ref={live2dHostRef} className="waifu-live2d-host" aria-hidden="true" />
+    </div>
   )
 }

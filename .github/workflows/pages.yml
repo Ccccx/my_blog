@@ -36,6 +36,9 @@ jobs:
       - name: Check daily-brief parsing
         run: npm run check:brief
 
+      - name: Check waifu drag math
+        run: npm run check:position
+
       - name: Build
         run: npm run build
 

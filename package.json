@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "check:markdown": "vite-node scripts/check-markdown-tables.mjs",
     "check:spa": "node scripts/check-spa-fallback.mjs",
-    "check:brief": "vite-node scripts/check-daily-brief.mjs"
+    "check:brief": "vite-node scripts/check-daily-brief.mjs",
+    "check:position": "vite-node scripts/check-waifu-position.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
