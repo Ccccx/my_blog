@@ -36,8 +36,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: SPA fallback for GitHub Pages
-        run: cp dist/index.html dist/404.html
+      - name: Check SPA fallback files
+        run: npm run check:spa
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/emit-spa-fallback.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
-    "check:markdown": "vite-node scripts/check-markdown-tables.mjs"
+    "check:markdown": "vite-node scripts/check-markdown-tables.mjs",
+    "check:spa": "node scripts/check-spa-fallback.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",

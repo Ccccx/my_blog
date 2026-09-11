@@ -37,7 +37,8 @@ npm run preview
 - `src/components/` — Layout / PostCard / Tag / Markdown
 - `src/pages/` — 首页、文章详情、关于
 - `.github/workflows/pages.yml` — GitHub Pages 自动部署
-- `public/404.html` — SPA 深链回退（配合 workflow 中 `cp dist/index.html dist/404.html`）
+- `public/404.html` — 未知深链的 `/?/` 重定向回退（项目页 `/my_blog/`）
+- `scripts/emit-spa-fallback.mjs` — 为已知路由写出 `dist/posts/<slug>/index.html`，使文章深链返回 HTTP 200
 
 ## 推送到 GitHub
 
