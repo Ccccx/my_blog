@@ -1,8 +1,18 @@
 import type { Post } from '../types'
+import body20260924 from '../content/20260924GitHub日榜分析.md?raw'
 import featuredBody from '../content/20260911GitHub日榜分析.md?raw'
 import grokBotBody from '../content/认识Grok-Bot.md?raw'
 
 export const posts: Post[] = [
+  {
+    slug: '20260924GitHub日榜分析',
+    title: '20260924GitHub日榜分析',
+    date: '2026-09-24',
+    tags: ['GitHub', '日榜', '开源', 'Agent'],
+    summary:
+      '2026-09-24 GitHub 日榜速览：Agent 编排运行时、Office harness 与金融盯盘同时升温。',
+    body: body20260924,
+  },
   {
     slug: '认识Grok-Bot',
     title: '认识 Grok Bot：能真正干活的 AI 队友',
