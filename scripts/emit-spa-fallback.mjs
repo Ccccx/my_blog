@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, readFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -13,14 +13,41 @@ if (slugs.length === 0) {
   process.exit(1)
 }
 
-const targets = [join(distDir, 'about', 'index.html')]
+const targets = []
+
+function addRoute(relativePath) {
+  targets.push(join(distDir, relativePath, 'index.html'))
+  const encoded = relativePath
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/')
+  if (encoded !== relativePath) {
+    targets.push(join(distDir, encoded, 'index.html'))
+  }
+}
+
+addRoute('about')
+addRoute('code-harness')
+addRoute('code-harness/architecture')
+addRoute('code-harness/compat')
+addRoute('code-harness/matrix')
 
 for (const slug of slugs) {
-  targets.push(join(distDir, 'posts', slug, 'index.html'))
-  const encoded = encodeURIComponent(slug)
-  if (encoded !== slug) {
-    targets.push(join(distDir, 'posts', encoded, 'index.html'))
-  }
+  addRoute(`posts/${slug}`)
+}
+
+const featureDir = join(root, 'src/content/code-harness/features')
+const featureSlugs = readdirSync(featureDir)
+  .filter((name) => name.endsWith('.md'))
+  .map((name) => name.slice(0, -'.md'.length))
+
+if (featureSlugs.length === 0) {
+  console.error('FAIL: no code-harness feature docs in src/content/code-harness/features')
+  process.exit(1)
+}
+
+for (const slug of featureSlugs) {
+  addRoute(`code-harness/features/${slug}`)
 }
 
 for (const target of targets) {

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { SITE_DESCRIPTION, SITE_NAME, GITHUB_REPO } from '../config'
 
 export function About() {
@@ -11,6 +12,10 @@ export function About() {
         本站使用 Vite、React、TypeScript 与 react-markdown 构建，以 Soft UI
         Evolution 浅色主题部署于 GitHub Pages。右下角看板娘会轮播 AI News Radar
         日更简报。
+      </p>
+      <p>
+        <Link to="/code-harness">code-harness 功能文档</Link>
+        是独立专题：每个功能一页，不混进首页文章列表。
       </p>
       <p>
         仓库地址：{' '}
