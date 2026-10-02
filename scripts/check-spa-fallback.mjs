@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -43,6 +43,45 @@ for (const [rel, label] of requiredFiles) {
     }
   } else if (!body.includes('id="root"') || body !== index) {
     console.error(`FAIL: ${label} is not a copy of dist/index.html`)
+    failed = true
+  }
+}
+
+const featureDir = join(root, 'src/content/code-harness/features')
+const featureSlugs = readdirSync(featureDir)
+  .filter((name) => name.endsWith('.md'))
+  .map((name) => name.slice(0, -3))
+
+if (featureSlugs.length !== 86) {
+  console.error(`FAIL: expected 86 feature docs, found ${featureSlugs.length}`)
+  failed = true
+}
+
+const harnessRoutes = [
+  'code-harness',
+  'code-harness/architecture',
+  'code-harness/compat',
+  'code-harness/matrix',
+  ...featureSlugs.flatMap((slug) => {
+    const plain = `code-harness/features/${slug}`
+    const encoded = plain
+      .split('/')
+      .map((segment) => encodeURIComponent(segment))
+      .join('/')
+    return encoded === plain ? [plain] : [plain, encoded]
+  }),
+]
+
+for (const rel of harnessRoutes) {
+  const path = join(distDir, rel, 'index.html')
+  if (!existsSync(path)) {
+    console.error(`FAIL: code-harness route missing dist/${rel}/index.html`)
+    failed = true
+    continue
+  }
+  const body = readFileSync(path, 'utf8')
+  if (!body.includes('id="root"') || body !== index) {
+    console.error(`FAIL: dist/${rel}/index.html is not a copy of dist/index.html`)
     failed = true
   }
 }

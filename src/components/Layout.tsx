@@ -18,6 +18,7 @@ export function Layout() {
             <NavLink to="/" end>
               首页
             </NavLink>
+            <NavLink to="/code-harness">code-harness</NavLink>
             <NavLink to="/about">关于</NavLink>
             <a href={`https://github.com/${GITHUB_REPO}`} target="_blank" rel="noreferrer">
               GitHub

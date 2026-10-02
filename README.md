@@ -34,11 +34,14 @@ npm run preview
 - `src/config.ts` — 站点名称等配置
 - `src/data/posts.ts` — 文章列表与正文
 - `src/content/` — 长文 Markdown 源文件
+- `src/content/code-harness/` — code-harness 专题（架构、差异说明、功能矩阵、86 篇功能文档）
 - `src/components/` — Layout / PostCard / Tag / Markdown
-- `src/pages/` — 首页、文章详情、关于
+- `src/pages/` — 首页、文章详情、关于、code-harness 专题
 - `.github/workflows/pages.yml` — GitHub Pages 自动部署
 - `public/404.html` — 未知深链的 `/?/` 重定向回退（项目页 `/my_blog/`）
-- `scripts/emit-spa-fallback.mjs` — 为已知路由写出 `dist/posts/<slug>/index.html`，使文章深链返回 HTTP 200
+- `scripts/emit-spa-fallback.mjs` — 为文章和 code-harness 专题写出嵌套 `index.html`，使深链返回 HTTP 200
+
+专题入口：`/code-harness`（线上 `https://ccccx.github.io/my_blog/code-harness/`）。功能页不进入首页文章列表。
 
 ## 推送到 GitHub
 
