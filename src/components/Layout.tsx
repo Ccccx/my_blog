@@ -1,10 +1,11 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { GITHUB_REPO, SITE_NAME } from '../config'
 import { WaifuCompanion } from './WaifuCompanion'
 
 export function Layout() {
+  const panda = useLocation().pathname.startsWith('/panda-paradise')
   return (
-    <div className="layout">
+    <div className={panda ? 'layout layout-panda' : 'layout'}>
       <header className="site-header">
         <div className="container header-inner">
           <Link to="/" className="site-logo">
@@ -19,6 +20,7 @@ export function Layout() {
               首页
             </NavLink>
             <NavLink to="/code-harness">code-harness</NavLink>
+            <NavLink to="/panda-paradise">熊猫乐园</NavLink>
             <NavLink to="/about">关于</NavLink>
             <a href={`https://github.com/${GITHUB_REPO}`} target="_blank" rel="noreferrer">
               GitHub
@@ -26,9 +28,10 @@ export function Layout() {
           </nav>
         </div>
       </header>
-      <main className="site-main container">
+      <main className={panda ? 'site-main site-main-panda' : 'site-main container'}>
         <Outlet />
       </main>
+      {panda ? null : (
       <footer className="site-footer">
         <div className="container footer-inner">
           <div>
@@ -38,7 +41,8 @@ export function Layout() {
           <p>© {new Date().getFullYear()} · 部署于 GitHub Pages</p>
         </div>
       </footer>
-      <WaifuCompanion />
+      )}
+      {panda ? null : <WaifuCompanion />}
     </div>
   )
 }
