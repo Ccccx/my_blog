@@ -14,6 +14,13 @@ npm run dev
 
 开发服务器默认地址：`http://localhost:5173/my_blog/`（注意 `base` 为 `/my_blog/`）。
 
+熊猫乐园互动页：`http://localhost:5173/my_blog/panda-paradise`
+
+- 在奶油色空白处拖动，转动整个地台
+- 在草地上画一个圈，长出一只熊猫宝宝（最多 12 只）
+- 拖动熊猫，把它放到岛上的新位置
+- 右上角「复位」恢复镜头，「全屏」进入全屏
+
 ## 构建
 
 ```bash
@@ -28,6 +35,7 @@ npm run preview
 - Vite + React + TypeScript
 - react-router-dom（路由）
 - react-markdown（文章 Markdown 渲染）
+- three / @react-three/fiber / @react-three/drei（熊猫乐园）
 
 ## 目录说明
 
@@ -36,7 +44,8 @@ npm run preview
 - `src/content/` — 长文 Markdown 源文件
 - `src/content/code-harness/` — code-harness 专题（架构、差异说明、功能矩阵、86 篇功能文档）
 - `src/components/` — Layout / PostCard / Tag / Markdown
-- `src/pages/` — 首页、文章详情、关于、code-harness 专题
+- `src/pages/` — 首页、文章详情、关于、code-harness 专题、熊猫乐园
+- `src/panda/` — 熊猫乐园的地台、手势和场景
 - `.github/workflows/pages.yml` — GitHub Pages 自动部署
 - `public/404.html` — 未知深链的 `/?/` 重定向回退（项目页 `/my_blog/`）
 - `scripts/emit-spa-fallback.mjs` — 为文章和 code-harness 专题写出嵌套 `index.html`，使深链返回 HTTP 200

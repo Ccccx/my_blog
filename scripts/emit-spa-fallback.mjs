@@ -27,6 +27,7 @@ function addRoute(relativePath) {
 }
 
 addRoute('about')
+addRoute('panda-paradise')
 addRoute('code-harness')
 addRoute('code-harness/architecture')
 addRoute('code-harness/compat')

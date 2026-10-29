@@ -1064,6 +1064,69 @@ pre code {
   }
 }
 
+.layout-panda {
+  height: 100dvh;
+  overflow: hidden;
+  background: #f4efe6;
+}
+
+.layout-panda .site-header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 30;
+  background: linear-gradient(180deg, rgba(244, 239, 230, 0.94), rgba(244, 239, 230, 0));
+  border-bottom: none;
+  pointer-events: none;
+}
+
+.layout-panda .header-inner,
+.layout-panda .site-nav a,
+.layout-panda .site-logo {
+  pointer-events: auto;
+}
+
+.layout-panda .site-main,
+.site-main-panda {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  min-height: 0;
+}
+
+.panda-loading {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  color: #6b7280;
+  background: #f4efe6;
+}
+
+@media (max-width: 640px) {
+  .layout-panda .header-inner {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .layout-panda .site-logo {
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  .layout-panda .site-logo small {
+    display: none;
+  }
+
+  .layout-panda .site-nav {
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .layout-panda .site-nav a {
+    padding: 0.28rem 0.45rem;
+    font-size: 0.82rem;
+  }
+}
+
 .waifu-live2d-host #live2d-widget,
 #live2d-widget {
   position: relative !important;
